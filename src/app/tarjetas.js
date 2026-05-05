@@ -22,11 +22,29 @@ const resenas = [
 const contenedor = document.getElementById("contenido");
   
 resenas.forEach(libro => {
-    contenedor.innerHTML += `
+    let estrellas = "";
+    for (let i = 1; i <= 5; i++) {
+      estrellas += `<span class="estrella" data-valor="${i}" style="cursor:pointer; font-size:24px;">
+        ${i <= libro.puntaje ? "★" : "☆"}
+      </span>`;
+}
+  
+contenedor.innerHTML += `
     <div class="tarjeta">
-        <h3>${libro.titulo}</h3>
-        <p><strong>Autor:</strong> ${libro.autor}</p>
-        <p><strong>Puntaje:</strong> ${"⭐".repeat(libro.puntaje)}</p>
-        <p>${libro.resena}</p>
-    </div>`;
+    <h3>${libro.titulo}</h3>
+    <p><strong>Autor:</strong> ${libro.autor}</p>
+    <div class="puntaje">${estrellas}</div>
+    <p>${libro.resena}</p>
+    </div>
+`;
+});
+  
+document.querySelectorAll(".estrella").forEach(estrella => {
+    estrella.addEventListener("click", function() {
+        const valor = this.dataset.valor;
+        const tarjeta = this.closest(".tarjeta");
+        tarjeta.querySelectorAll(".estrella").forEach(e => {
+            e.textContent = e.dataset.valor <= valor ? "★" : "☆";
+        });
+    });
 });
