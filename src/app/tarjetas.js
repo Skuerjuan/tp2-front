@@ -51,19 +51,3 @@ function renderTarjeta(libro, index) {
 }
 
 resenas.forEach((libro, i) => renderTarjeta(libro, i));
-
-function agregarLibro() {
-  const titulo = document.getElementById("tituloInput").value.trim();
-  const autor  = document.getElementById("autorInput").value.trim();
-  const resena = document.getElementById("resenaInput").value.trim();
-  if (!titulo || !autor) {
-    alert("Por favor completá al menos el título y el autor.");
-    return;
-  }
-  const nuevoLibro = { titulo, autor, puntaje: 0, resena: resena || "Sin reseña aún." };
-  resenas.push(nuevoLibro);
-  renderTarjeta(nuevoLibro, resenas.length - 1);
-  document.getElementById("tituloInput").value = "";
-  document.getElementById("autorInput").value  = "";
-  document.getElementById("resenaInput").value = "";
-}
