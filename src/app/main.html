@@ -5,32 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 </head>
-<body>
+  <body>
     <div id="header">
       <h1 id="titulo">Página de reseñas</h1>
       <p id="subtitulo">Deja reseñas a los libros que leíste y lleva un registro.</p>
     </div>
+
     <div class= "navbar" id="nav">
-        <div id="logo"></div>
+      <div id="logo"></div>
         <p>Home</p>
         <p>Libros leídos</p>
         <p>Reseñas</p>
         <p>Buscar</p>
-    </div>
+      </div>
+    </div>  
 
-  <main>
+    <main>
       <div id="formulario">
-          <h2>Agregar un libro</h2>
-          <input type="text" id="tituloInput" placeholder="Título">
-          <input type="text" id="autorInput" placeholder="Autor">
-          <textarea id="resenaInput" placeholder="Escribe tu reseña…"></textarea>
-          <button onclick="agregarLibro()">Agregar libro</button>
+        <h2>Agregar un libro</h2>
+        <input type="text" id="tituloInput" placeholder="Título">
+        <input type="text" id="autorInput" placeholder="Autor">
+        <textarea id="resenaInput" placeholder="Escribe tu reseña…"></textarea>
+        <button onclick="agregarLibro()">Agregar libro</button>
       </div>
 
       <div id="contenido"></div>
+    </main>
 
-
-  <script src="tarjetas.js"></script>
+    <script src="tarjetas.js"></script>
 
   </body>
 </html>
