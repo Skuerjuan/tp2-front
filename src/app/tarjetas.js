@@ -1,3 +1,4 @@
+// ── Datos iniciales ──
 const resenas = [
     {
       titulo: "Cien años de soledad",
@@ -20,31 +21,49 @@ const resenas = [
 ];
   
 const contenedor = document.getElementById("contenido");
+
+function renderTarjeta(libro, index) {
+  let estrellas = "";
+  for (let i = 1; i <= 5; i++) {
+    estrellas += `<span class="estrella" data-valor="${i}">${i <= libro.puntaje ? "★" : "☆"}</span>`;
+  }
   
-resenas.forEach(libro => {
-    let estrellas = "";
-    for (let i = 1; i <= 5; i++) {
-      estrellas += `<span class="estrella" data-valor="${i}" style="cursor:pointer; font-size:24px;">
-        ${i <= libro.puntaje ? "★" : "☆"}
-      </span>`;
-}
+  const 
+    div = document.createElement("div");
+    div.className = "tarjeta";
+    div.style.animationDelay = `${index * 0.08}s`;
+    div.innerHTML = `
+      <h3>${libro.titulo}</h3>
+      <p><strong>Autor:</strong> ${libro.autor}</p>
+      <div class="puntaje">${estrellas}</div>
+      <p>${libro.resena}</p>`
+  ;
   
-contenedor.innerHTML += `
-    <div class="tarjeta">
-    <h3>${libro.titulo}</h3>
-    <p><strong>Autor:</strong> ${libro.autor}</p>
-    <div class="puntaje">${estrellas}</div>
-    <p>${libro.resena}</p>
-    </div>
-`;
-});
-  
-document.querySelectorAll(".estrella").forEach(estrella => {
-    estrella.addEventListener("click", function() {
-        const valor = this.dataset.valor;
-        const tarjeta = this.closest(".tarjeta");
-        tarjeta.querySelectorAll(".estrella").forEach(e => {
-            e.textContent = e.dataset.valor <= valor ? "★" : "☆";
-        });
+  div.querySelectorAll(".estrella").forEach(estrella => {
+    estrella.addEventListener("click", function () {
+      const valor = this.dataset.valor;
+      div.querySelectorAll(".estrella").forEach(e => {
+        e.textContent = e.dataset.valor <= valor ? "★" : "☆";
+      });
     });
-});
+  });
+  contenedor.appendChild(div);
+}
+
+resenas.forEach((libro, i) => renderTarjeta(libro, i));
+
+function agregarLibro() {
+  const titulo = document.getElementById("tituloInput").value.trim();
+  const autor  = document.getElementById("autorInput").value.trim();
+  const resena = document.getElementById("resenaInput").value.trim();
+  if (!titulo || !autor) {
+    alert("Por favor completá al menos el título y el autor.");
+    return;
+  }
+  const nuevoLibro = { titulo, autor, puntaje: 0, resena: resena || "Sin reseña aún." };
+  resenas.push(nuevoLibro);
+  renderTarjeta(nuevoLibro, resenas.length - 1);
+  document.getElementById("tituloInput").value = "";
+  document.getElementById("autorInput").value  = "";
+  document.getElementById("resenaInput").value = "";
+}
