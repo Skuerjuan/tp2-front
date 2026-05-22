@@ -28,16 +28,15 @@ function renderTarjeta(libro, index) {
     estrellas += `<span class="estrella" data-valor="${i}">${i <= libro.puntaje ? "★" : "☆"}</span>`;
   }
   
-  const 
-    div = document.createElement("div");
-    div.className = "tarjeta";
-    div.style.animationDelay = `${index * 0.08}s`;
-    div.innerHTML = `
-      <h3>${libro.titulo}</h3>
-      <p><strong>Autor:</strong> ${libro.autor}</p>
-      <div class="puntaje">${estrellas}</div>
-      <p>${libro.resena}</p>`
-  ;
+  const div = document.createElement("div");
+  div.className = "tarjeta";
+  div.style.animationDelay = `${index * 0.08}s`;
+  div.innerHTML = `
+    <h3>${libro.titulo}</h3>
+    <p><strong>Autor:</strong> ${libro.autor}</p>
+    <div class="puntaje">${estrellas}</div>
+    <p>${libro.resena}</p>
+  `;
   
   div.querySelectorAll(".estrella").forEach(estrella => {
     estrella.addEventListener("click", function () {
@@ -47,6 +46,7 @@ function renderTarjeta(libro, index) {
       });
     });
   });
+
   contenedor.appendChild(div);
 }
 
