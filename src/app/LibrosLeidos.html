@@ -1,6 +1,94 @@
-<div id="formulario">
-    <input type="text" id="tituloInput" placeholder="Título">
-    <input type="text" id="autorInput" placeholder="Autor">
-    <textarea id="resenaInput" placeholder="Reseña"></textarea>
-    <button onclick="agregarLibro()">Agregar</button>
-  </div>
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Libros leídos — Página de Reseñas</title>
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+      <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+
+    <div id="header">
+      <h1 id="titulo">Libros leídos</h1>
+      <p id="subtitulo">Todos los libros que ya pasaron por tus manos.</p>
+    </div>
+
+    <nav id="nav">
+      <a href="main.html">Home</a>
+      <a href="LibrosLeidos.html" class="active">Libros leídos</a>
+      <a href="Resenas.html">Reseñas</a>
+      <a href="Buscar.html">Buscar</a>
+    </nav>
+
+    <main>
+
+      <div class="filtros-bar">
+        <input
+          type="text"
+          id="filtroTexto"
+          placeholder="Filtrar por título o autor…"
+        >
+        <select id="filtroGenero">
+          <option value="">Todos los géneros</option>
+          <option value="novela">Novela</option>
+          <option value="cuento">Cuento</option>
+          <option value="ensayo">Ensayo</option>
+          <option value="poesia">Poesía</option>
+          <option value="ciencia ficcion">Ciencia ficción</option>
+          <option value="fantasia">Fantasía</option>
+          <option value="terror">Terror</option>
+          <option value="historica">Histórica</option>
+          <option value="biografía">Biografía</option>
+          <option value="otro">Otro</option>
+        </select>
+        <select id="filtroPuntaje">
+          <option value="">Cualquier puntaje</option>
+          <option value="5">★★★★★</option>
+          <option value="4">★★★★☆ o más</option>
+          <option value="3">★★★☆☆ o más</option>
+        </select>
+      </div>
+      
+      <div id="contenido" class="grid-libros"></div>
+      <p class="sin-resultados" id="sinResultados" style="display:none;">
+        No se encontraron libros con esos filtros.
+      </p>
+
+    </main>
+
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal">
+        <button class="modal-cerrar" id="modalCerrar" aria-label="Cerrar">✕</button>
+        <h2>Editar reseña</h2>
+        <div class="formulario-box">
+          <input type="hidden" id="editIndex">
+          <input type="text"   id="editTitulo"  placeholder="Título">
+          <input type="text"   id="editAutor"   placeholder="Autor">
+          <select id="editGenero" class="full-col">
+            <option value="">Seleccionar género…</option>
+            <option value="novela">Novela</option>
+            <option value="cuento">Cuento</option>
+            <option value="ensayo">Ensayo</option>
+            <option value="poesia">Poesía</option>
+            <option value="ciencia ficcion">Ciencia ficción</option>
+            <option value="fantasia">Fantasía</option>
+            <option value="terror">Terror</option>
+            <option value="historica">Histórica</option>
+            <option value="biografía">Biografía</option>
+            <option value="otro">Otro</option>
+          </select>
+
+          <textarea id="editResena" placeholder="Tu reseña…"></textarea>
+          <button type="submit" onclick="guardarEdicion()">Guardar cambios</button>
+        </div>
+      </div>
+    </div>
+    
+    <script src="tarjetas.js"></script>
+    <script src="AgregarLibro.js"></script>
+    
+  </body>
+</html>

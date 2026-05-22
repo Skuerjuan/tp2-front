@@ -1,4 +1,3 @@
-// ── Datos iniciales ──
 const resenas = [
     {
       titulo: "Cien años de soledad",
