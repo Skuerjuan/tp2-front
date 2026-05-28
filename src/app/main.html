@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+  <body>
+    <div id="header">
+      <h1 id="titulo">Página de reseñas</h1>
+      <p id="subtitulo">Deja reseñas a los libros que leíste y lleva un registro.</p>
+    </div>
+
+    <nav id="nav">
+      <a href="main.html">Home</a>
+      <a href="LibrosLeidos.html" class="active">Libros leídos</a>
+      <a href="Resenas.html">Reseñas</a>
+      <a href="Buscar.html">Buscar</a>
+    </nav>
+
+    <main>
+      <div class="hero">
+          <h2>Bienvenido a tu biblioteca personal</h2>
+          <p>Llevá un registro de lo que leíste, escribí tus impresiones y descubrí nuevas lecturas.</p>
+      </div>
+
+      <h2 class="section-title">✦ Recomendaciones</h2>
+
+      <div class="recomendaciones-grid" id="recomendaciones">
+
+        <div class="rec-card" style="animation-delay:.05s">
+          <div class="rec-label">Clásico latinoamericano</div>
+          <h3>Pedro Páramo</h3>
+          <p class="rec-autor">Juan Rulfo</p>
+          <p>Un hombre viaja al pueblo de su padre y encuentra solo susurros y fantasmas. Novela que inventó el realismo mágico.</p>
+        </div>
+
+        <div class="rec-card" style="animation-delay:.10s">
+          <div class="rec-label">Ficción especulativa</div>
+          <h3>El nombre del mundo es bosque</h3>
+          <p class="rec-autor">Ursula K. Le Guin</p>
+          <p>Una colonia humana en un planeta forestal. Una reflexión poderosa sobre el colonialismo y la resistencia.</p>
+        </div>
+
+        <div class="rec-card" style="animation-delay:.15s">
+          <div class="rec-label">Ensayo filosófico</div>
+          <h3>El mito de Sísifo</h3>
+          <p class="rec-autor">Albert Camus</p>
+          <p>¿Tiene sentido vivir en un mundo absurdo? Camus lo debate con claridad y elegancia únicas.</p>
+        </div>
+
+        <div class="rec-card" style="animation-delay:.20s">
+          <div class="rec-label">Novela negra</div>
+          <h3>La ciudad y los perros</h3>
+          <p class="rec-autor">Mario Vargas Llosa</p>
+          <p>Vida brutal en un colegio militar de Lima. Una obra de iniciación que no perdona ni olvida.</p>
+        </div>
+
+        <div class="rec-card" style="animation-delay:.25s">
+          <div class="rec-label">Cuento fantástico</div>
+          <h3>La casa de los espíritus</h3>
+          <p class="rec-autor">Isabel Allende</p>
+          <p>Tres generaciones de mujeres en Chile. Magia, política y amor entretejidos en una saga memorable.</p>
+        </div>
+
+        <div class="rec-card" style="animation-delay:.30s">
+          <div class="rec-label">Novela histórica</div>
+          <h3>El nombre de la rosa</h3>
+          <p class="rec-autor">Umberto Eco</p>
+          <p>Un monje detective investiga una serie de muertes en una abadía medieval. Erudición y suspenso a la vez.</p>
+        </div>
+
+      </div>
+    
+    </main>
+
+    <script src="tarjetas.js"></script>
+    <script src="AgregarLibro.js"></script>
+
+  </body>
+</html>

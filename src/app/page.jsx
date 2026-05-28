@@ -1,40 +1,88 @@
-import { createClient } from "../utils/supabase/server.js";
-import Link from "next/link.js";
+"use client";
 
-export default async function Home() {
+import { useState } from "react";
+import "./styles.css";
 
-  const supabase = await createClient()
-  
-  // const { data, error } = await supabase
-  // .from('users')
-  // .insert([{ nombre: 'John Doe', email: 'johndoe@gmail.com'}])
-  // console.log(data)
+export default function Home() {
+  const [resenas, setResenas] = useState([
+    {
+      titulo: "Cien años de soledad",
+      autor: "Gabriel García Márquez",
+      puntaje: 5,
+      resena: "Una obra maestra del realismo mágico.",
+    },
+    {
+      titulo: "El túnel",
+      autor: "Ernesto Sábato",
+      puntaje: 4,
+      resena: "Intensa y oscura, no la podés soltar.",
+    },
+    {
+      titulo: "Ficciones",
+      autor: "Jorge Luis Borges",
+      puntaje: 5,
+      resena: "Cada cuento es un universo propio.",
+    },
+  ]);
 
-  async function getUsers() {
-    const { data, error } = await supabase
-    .from('users')
-    .select('*')
+  const cambiarPuntaje = (index, nuevoPuntaje) => {
+    const nuevasResenas = [...resenas];
 
-    if(error) console.error("Error fetching data:", error);
-  }
+    nuevasResenas[index].puntaje = nuevoPuntaje;
+
+    setResenas(nuevasResenas);
+  };
 
 
   return (
     <>
-    {
       <div>
-      {
-        data.map((user) => (
-          <div key={user.id}>
-            <p>{user.nombre}</p>
-            <p>{user.email}</p>
-          </div>
-        ))
-      }
+        <div id="header">
+          <h1 id="titulo">Página de reseñas</h1>
+
+          <p id="subtitulo">
+            Deja reseñas a los libros que leíste y lleva un registro.
+          </p>
+        </div>
+
+        <div id="nav">
+          <div id="logo"></div>
+
+          <p>Home</p>
+          <p>Libros leídos</p>
+          <p>Reseñas</p>
+          <p>Buscar</p>
+        </div>
+
+        <div id="contenido">
+          {resenas.map((libro, index) => (
+            <div className="tarjeta" key={index}>
+              <h3>{libro.titulo}</h3>
+
+              <p>
+                <strong>Autor:</strong> {libro.autor}
+              </p>
+
+              <div className="puntaje">
+                {[1, 2, 3, 4, 5].map((num) => (
+                  <span
+                    key={num}
+                    onClick={() => cambiarPuntaje(index, num)}
+                    style={{
+                      cursor: "pointer",
+                      fontSize: "24px",
+                    }}
+                  >
+                    {num <= libro.puntaje ? "★" : "☆"}
+                  </span>
+                ))}
+              </div>
+
+              <p>{libro.resena}</p>
+            </div>
+          ))}
+        </div>
       </div>
-      
-    }
-    <Link href="/login" className="p-2 border-solid border-black">Login</Link>
     </>
   );
 }
