@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import "./styles.css";
 
 export default function Home() {
@@ -48,10 +49,10 @@ export default function Home() {
         <div id="nav">
           <div id="logo"></div>
 
-          <p>Home</p>
-          <p>Libros leídos</p>
-          <p>Reseñas</p>
-          <p>Buscar</p>
+          <Link href="/">Home</Link>
+          <Link href="/leidos">Libros leídos</Link>
+          <Link href="/resenas">Reseñas</Link>
+          <Link href="/buscar">Buscar</Link>
         </div>
 
         <div id="contenido">
@@ -86,3 +87,24 @@ export default function Home() {
     </>
   );
 }
+
+export const resenas = [
+  {
+    titulo: "Cien años de soledad",
+    autor: "Gabriel García Márquez",
+    puntaje: 5,
+    resena: "Una obra maestra del realismo mágico.",
+  },
+  {
+    titulo: "El túnel",
+    autor: "Ernesto Sábato",
+    puntaje: 4,
+    resena: "Intensa y oscura, no la podés soltar.",
+  },
+  {
+    titulo: "Ficciones",
+    autor: "Jorge Luis Borges",
+    puntaje: 5,
+    resena: "Cada cuento es un universo propio.",
+  },
+];
