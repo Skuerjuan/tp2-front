@@ -1,34 +1,55 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
+import Navbar from "@/components/Navbar";
+import BookCard from "@/components/BookCard";
 import "../styles.css";
-import { resenas as initialResenas } from "../page.jsx";
+import { deleteResena, fetchLeidos, updateResena } from "@/utils/resenas.js";
 
 export default function LibrosLeidosPage() {
-  const [resenas, setResenas] = useState(() => {
-    try {
-      const raw = localStorage.getItem("resenas");
-      return raw ? JSON.parse(raw) : initialResenas;
-    } catch {
-      return initialResenas;
-    }
-  });
+  const [resenas, setResenas] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const [filtroTexto, setFiltroTexto] = useState("");
   const [filtroGenero, setFiltroGenero] = useState("");
   const [filtroPuntaje, setFiltroPuntaje] = useState("");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editIndex, setEditIndex] = useState(null);
+  const [editId, setEditId] = useState(null);
   const [editTitulo, setEditTitulo] = useState("");
   const [editAutor, setEditAutor] = useState("");
   const [editGenero, setEditGenero] = useState("");
   const [editResena, setEditResena] = useState("");
 
   useEffect(() => {
-    localStorage.setItem("resenas", JSON.stringify(resenas));
-  }, [resenas]);
+    let mounted = true;
+
+    async function loadResenas() {
+      try {
+        setLoading(true);
+        setError("");
+        const data = await fetchLeidos();
+        if (mounted) {
+          setResenas(data);
+        }
+      } catch (err) {
+        if (mounted) {
+          setError(err?.message || "No se pudieron cargar las reseñas.");
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadResenas();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const resultados = useMemo(() => {
     return resenas.filter((r) => {
@@ -43,9 +64,10 @@ export default function LibrosLeidosPage() {
     });
   }, [resenas, filtroTexto, filtroGenero, filtroPuntaje]);
 
-  function abrirEditar(i) {
-    const t = resenas[i];
-    setEditIndex(i);
+  function abrirEditar(id) {
+    const t = resenas.find((item) => item.id === id);
+    if (!t) return;
+    setEditId(id);
     setEditTitulo(t.titulo);
     setEditAutor(t.autor);
     setEditGenero(t.genero || "");
@@ -53,38 +75,50 @@ export default function LibrosLeidosPage() {
     setIsModalOpen(true);
   }
 
-  function guardarEdicion(e) {
+  async function guardarEdicion(e) {
     e?.preventDefault();
-    if (editIndex === null) return;
-    setResenas((prev) => {
-      const copy = [...prev];
-      copy[editIndex] = {
-        ...copy[editIndex],
+    if (editId === null) return;
+
+    try {
+      const updated = await updateResena(editId, {
         titulo: editTitulo.trim(),
         autor: editAutor.trim(),
         genero: editGenero,
         resena: editResena.trim(),
-      };
-      return copy;
-    });
-    cerrarModal();
+      });
+
+      setResenas((prev) => prev.map((item) => (item.id === editId ? updated : item)));
+      cerrarModal();
+    } catch (err) {
+      setError(err?.message || "No se pudo guardar la edición.");
+    }
   }
 
   function cerrarModal() {
     setIsModalOpen(false);
-    setEditIndex(null);
+    setEditId(null);
     setEditTitulo("");
     setEditAutor("");
     setEditGenero("");
     setEditResena("");
   }
 
-  function cambiarPuntaje(index, valor) {
-    setResenas((prev) => {
-      const copy = [...prev];
-      copy[index] = { ...copy[index], puntaje: Number(valor) };
-      return copy;
-    });
+  async function cambiarPuntaje(id, valor) {
+    try {
+      const updated = await updateResena(id, { puntaje: Number(valor) });
+      setResenas((prev) => prev.map((item) => (item.id === id ? updated : item)));
+    } catch (err) {
+      setError(err?.message || "No se pudo actualizar el puntaje.");
+    }
+  }
+
+  async function eliminarResena(id) {
+    try {
+      await deleteResena(id);
+      setResenas((prev) => prev.filter((item) => item.id !== id));
+    } catch (err) {
+      setError(err?.message || "No se pudo eliminar la reseña.");
+    }
   }
 
   return (
@@ -94,14 +128,7 @@ export default function LibrosLeidosPage() {
         <p id="subtitulo">Todos los libros que ya pasaron por tus manos.</p>
       </header>
 
-      <nav id="nav">
-        <Link href="/">Home</Link>
-        <Link href="/libros-leidos" className="active">
-          Libros leídos
-        </Link>
-        <Link href="/resenas">Reseñas</Link>
-        <Link href="/buscar">Buscar</Link>
-      </nav>
+      <Navbar active="leidos" />
 
       <div className="filtros-bar">
         <input
@@ -141,61 +168,23 @@ export default function LibrosLeidosPage() {
         </select>
       </div>
 
+      {loading && <p className="sin-resultados">Cargando reseñas...</p>}
+      {!loading && error && <p className="sin-resultados">{error}</p>}
+
       <div id="contenido" className="grid-libros">
-        {resultados.length === 0 ? (
+        {!loading && !error && resultados.length === 0 ? (
           <p className="sin-resultados">No se encontraron libros con esos filtros.</p>
         ) : (
           resultados.map((libro, i) => {
-            const idx = resenas.indexOf(libro);
             return (
-              <article
-                className="tarjeta"
-                key={`${libro.titulo}-${idx}`}
-                style={{ animationDelay: `${idx * 0.06}s` }}
-              >
-                <h3>{libro.titulo}</h3>
-                <p>
-                  <strong>Autor:</strong> {libro.autor}
-                </p>
-                <p>
-                  <em>{libro.genero}</em>
-                </p>
-
-                <div className="puntaje">
-                  {[1, 2, 3, 4, 5].map((n) => (
-                    <button
-                      key={n}
-                      type="button"
-                      onClick={() => cambiarPuntaje(idx, n)}
-                      style={{
-                        cursor: "pointer",
-                        fontSize: "24px",
-                        background: "transparent",
-                        border: "none",
-                      }}
-                      aria-label={`Puntaje ${n}`}
-                    >
-                      {n <= libro.puntaje ? "★" : "☆"}
-                    </button>
-                  ))}
-                </div>
-
-                <p>{libro.resena}</p>
-
-                <div style={{ marginTop: 8, display: "flex", gap: 8 }}>
-                  <button type="button" onClick={() => abrirEditar(idx)}>
-                    Editar
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setResenas((prev) => prev.filter((_, j) => j !== idx))
-                    }
-                  >
-                    Eliminar
-                  </button>
-                </div>
-              </article>
+              <BookCard
+                key={libro.id}
+                book={libro}
+                animationDelay={`${i * 0.06}s`}
+                onRate={cambiarPuntaje}
+                onEdit={abrirEditar}
+                onDelete={eliminarResena}
+              />
             );
           })
         )}

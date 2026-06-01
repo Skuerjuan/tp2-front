@@ -1,15 +1,46 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 import "../styles.css";
-import { resenas as initialResenas } from "../page.jsx";
+import Navbar from "@/components/Navbar";
+import { fetchResenas, updateResena } from "@/utils/resenas.js";
 
 export default function BuscarPage() {
 const [query, setQuery] = useState("");
 const [genero, setGenero] = useState("");
 const [minPuntaje, setMinPuntaje] = useState("");
-const [resenas, setResenas] = useState(initialResenas);
+const [resenas, setResenas] = useState([]);
+const [loading, setLoading] = useState(true);
+const [error, setError] = useState("");
+
+useEffect(() => {
+    let mounted = true;
+
+    async function loadResenas() {
+        try {
+            setLoading(true);
+            setError("");
+            const data = await fetchResenas();
+            if (mounted) {
+                setResenas(data);
+            }
+        } catch (err) {
+            if (mounted) {
+                setError(err?.message || "No se pudieron cargar los libros.");
+            }
+        } finally {
+            if (mounted) {
+                setLoading(false);
+            }
+        }
+    }
+
+    loadResenas();
+
+    return () => {
+        mounted = false;
+    };
+}, []);
 
 const resultados = useMemo(() => {
     return resenas.filter((r) => {
@@ -24,12 +55,13 @@ const resultados = useMemo(() => {
     });
 }, [resenas, query, genero, minPuntaje]);
 
-function cambiarPuntaje(index, valor) {
-    setResenas((prev) => {
-        const copy = [...prev];
-        copy[index] = { ...copy[index], puntaje: Number(valor) };
-        return copy;
-    });
+async function cambiarPuntaje(id, valor) {
+    try {
+        const updated = await updateResena(id, { puntaje: Number(valor) });
+        setResenas((prev) => prev.map((item) => (item.id === id ? updated : item)));
+    } catch (err) {
+        setError(err?.message || "No se pudo actualizar el puntaje.");
+    }
 }
 
 return (
@@ -39,27 +71,23 @@ return (
         <p id="subtitulo">Encontrá libros en tu biblioteca personal.</p>
         </header>
 
-        <nav id="nav">
-            <Link href="/">Home</Link>
-            <Link href="/libros">Libros leídos</Link>
-            <Link href="/resenas">Reseñas</Link>
-            <Link href="/buscar" className="active">Buscar</Link>
-        </nav>
+        <Navbar active="buscar" />
 
-        <section className="buscador-hero">
-            <h2>¿Qué libro estás buscando?</h2>
+        {loading && <p className="sin-resultados">Cargando libros...</p>}
+        {!loading && error && <p className="sin-resultados">{error}</p>}
 
-            <div className="buscador-wrap">
+        <section className="p-4 m-2 flex flex-col items-start gap-4">
+            <p className="text-lg font-semibold m-2">¿Qué libro estás buscando?</p>
+
+            <div className="flex gap-2 w-full max-w-md">
                 <input
                     id="buscarInput"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="Título, autor o palabra clave…"
                     autoComplete="off"
+                    className="flex-grow border border-gray-300 rounded px-2 py-2 focus:outline-none focus:ring-2 focus:ring-black"
                 />
-                <button type="button" onClick={() => { /* opcional: foco o submit */ }}>
-                    Buscar
-                </button>
             </div>
 
             <div className="filtro-genero-buscar">
@@ -91,11 +119,11 @@ return (
         </p>
 
         <div id="contenido" className="grid-libros">
-            {resultados.length === 0 ? (
+            {!loading && !error && resultados.length === 0 ? (
             <p className="sin-resultados">No se encontraron resultados para tu búsqueda.</p>
             ) : (
             resultados.map((libro, i) => (
-                <article className="tarjeta" key={`${libro.titulo}-${i}`} style={{ animationDelay: `${i * 0.08}s` }}>
+                <article className="tarjeta" key={libro.id} style={{ animationDelay: `${i * 0.08}s` }}>
                 <h3>{libro.titulo}</h3>
                 <p><strong>Autor:</strong> {libro.autor}</p>
 
@@ -103,7 +131,7 @@ return (
                     {[1, 2, 3, 4, 5].map((n) => (
                     <span
                         key={n}
-                        onClick={() => cambiarPuntaje(resenas.indexOf(libro), n)}
+                        onClick={() => cambiarPuntaje(libro.id, n)}
                         style={{ cursor: "pointer", fontSize: "24px" }}
                         role="button"
                         aria-label={`Puntaje ${n}`}

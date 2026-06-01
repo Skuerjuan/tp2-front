@@ -3,17 +3,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import "../styles.css";
-import { resenas as initialResenas } from "../page.jsx";
+import { fetchResenas, insertResena, updateResena } from "@/utils/resenas.js";
 
 export default function ResenasPage() {
-  const [resenas, setResenas] = useState(() => {
-    try {
-      const raw = localStorage.getItem("resenas");
-      return raw ? JSON.parse(raw) : initialResenas;
-    } catch {
-      return initialResenas;
-    }
-  });
+  const [resenas, setResenas] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const [titulo, setTitulo] = useState("");
   const [autor, setAutor] = useState("");
@@ -22,10 +17,35 @@ export default function ResenasPage() {
   const [resenaText, setResenaText] = useState("");
 
   useEffect(() => {
-    localStorage.setItem("resenas", JSON.stringify(resenas));
-  }, [resenas]);
+    let mounted = true;
 
-  function agregarLibro(e) {
+    async function loadResenas() {
+      try {
+        setLoading(true);
+        setError("");
+        const data = await fetchResenas();
+        if (mounted) {
+          setResenas(data);
+        }
+      } catch (err) {
+        if (mounted) {
+          setError(err?.message || "No se pudieron cargar las reseñas.");
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadResenas();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  async function agregarLibro(e) {
     e?.preventDefault();
     if (!titulo.trim() || !autor.trim()) return;
 
@@ -37,20 +57,26 @@ export default function ResenasPage() {
       resena: resenaText.trim(),
     };
 
-    setResenas((prev) => [nuevo, ...prev]);
-    setTitulo("");
-    setAutor("");
-    setGenero("");
-    setPuntajeTemp(0);
-    setResenaText("");
+    try {
+      const inserted = await insertResena(nuevo);
+      setResenas((prev) => [inserted, ...prev]);
+      setTitulo("");
+      setAutor("");
+      setGenero("");
+      setPuntajeTemp(0);
+      setResenaText("");
+    } catch (err) {
+      setError(err?.message || "No se pudo crear la reseña.");
+    }
   }
 
-  function cambiarPuntaje(index, valor) {
-    setResenas((prev) => {
-      const copy = [...prev];
-      copy[index] = { ...copy[index], puntaje: Number(valor) };
-      return copy;
-    });
+  async function cambiarPuntaje(id, valor) {
+    try {
+      const updated = await updateResena(id, { puntaje: Number(valor) });
+      setResenas((prev) => prev.map((item) => (item.id === id ? updated : item)));
+    } catch (err) {
+      setError(err?.message || "No se pudo actualizar el puntaje.");
+    }
   }
 
   return (
@@ -68,6 +94,9 @@ export default function ResenasPage() {
         </Link>
         <Link href="/buscar">Buscar</Link>
       </nav>
+
+      {loading && <p className="sin-resultados">Cargando reseñas...</p>}
+      {!loading && error && <p className="sin-resultados">{error}</p>}
 
       <section className="formulario-box" id="formulario">
         <h2>Agregar un libro</h2>
@@ -173,13 +202,13 @@ export default function ResenasPage() {
       <h2 className="section-title">✦ Últimas reseñas agregadas</h2>
 
       <div id="contenido" className="grid-libros">
-        {resenas.length === 0 ? (
+        {!loading && !error && resenas.length === 0 ? (
           <p className="sin-resultados">No hay reseñas aún.</p>
         ) : (
           resenas.map((libro, i) => (
             <article
               className="tarjeta"
-              key={`${libro.titulo}-${i}`}
+              key={libro.id}
               style={{ animationDelay: `${i * 0.06}s` }}
             >
               <h3>{libro.titulo}</h3>
@@ -195,7 +224,7 @@ export default function ResenasPage() {
                   <button
                     key={n}
                     type="button"
-                    onClick={() => cambiarPuntaje(i, n)}
+                    onClick={() => cambiarPuntaje(libro.id, n)}
                     style={{
                       cursor: "pointer",
                       fontSize: "24px",

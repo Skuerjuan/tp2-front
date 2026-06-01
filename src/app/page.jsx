@@ -1,110 +1,48 @@
-"use client";
 
-import { useState } from "react";
-import Link from "next/link";
+import Navbar from "@/components/Navbar";
 import "./styles.css";
+import { createClient } from "@/utils/supabase/server.js";
 
-export default function Home() {
-  const [resenas, setResenas] = useState([
-    {
-      titulo: "Cien años de soledad",
-      autor: "Gabriel García Márquez",
-      puntaje: 5,
-      resena: "Una obra maestra del realismo mágico.",
-    },
-    {
-      titulo: "El túnel",
-      autor: "Ernesto Sábato",
-      puntaje: 4,
-      resena: "Intensa y oscura, no la podés soltar.",
-    },
-    {
-      titulo: "Ficciones",
-      autor: "Jorge Luis Borges",
-      puntaje: 5,
-      resena: "Cada cuento es un universo propio.",
-    },
-  ]);
-
-  const cambiarPuntaje = (index, nuevoPuntaje) => {
-    const nuevasResenas = [...resenas];
-
-    nuevasResenas[index].puntaje = nuevoPuntaje;
-
-    setResenas(nuevasResenas);
-  };
+export default async function Home() {
+  const supabase = await createClient();
+  const { data: recomendaciones = [] } = await supabase.from("recomendaciones").select("*");
 
 
   return (
     <>
-      <div>
-        <div id="header">
-          <h1 id="titulo">Página de reseñas</h1>
+      <div id="header">
+        <h1 id="titulo">Página de reseñas</h1>
+        <p id="subtitulo">Dejá reseñas a los libros que leíste y lleva un registro.</p>
+      </div>
 
-          <p id="subtitulo">
-            Deja reseñas a los libros que leíste y lleva un registro.
+      <Navbar active="home" />
+
+      <main>
+        <div className="hero">
+          <h2>Bienvenido a tu biblioteca personal</h2>
+          <p>
+            Llevá un registro de lo que leíste, escribí tus impresiones y descubrí nuevas
+            lecturas.
           </p>
         </div>
 
-        <div id="nav">
-          <div id="logo"></div>
+        <h2 className="section-title">✦ Recomendaciones</h2>
 
-          <Link href="/">Home</Link>
-          <Link href="/leidos">Libros leídos</Link>
-          <Link href="/resenas">Reseñas</Link>
-          <Link href="/buscar">Buscar</Link>
-        </div>
-
-        <div id="contenido">
-          {resenas.map((libro, index) => (
-            <div className="tarjeta" key={index}>
+        <div className="recomendaciones-grid" id="recomendaciones">
+          {recomendaciones.map((libro, index) => (
+            <div
+              className="rec-card"
+              key={libro.id ?? `${libro.titulo}-${index}`}
+              style={{ animationDelay: `${0.05 * (index + 1)}s` }}
+            >
+              <div className="rec-label">{libro.genero || "Recomendación"}</div>
               <h3>{libro.titulo}</h3>
-
-              <p>
-                <strong>Autor:</strong> {libro.autor}
-              </p>
-
-              <div className="puntaje">
-                {[1, 2, 3, 4, 5].map((num) => (
-                  <span
-                    key={num}
-                    onClick={() => cambiarPuntaje(index, num)}
-                    style={{
-                      cursor: "pointer",
-                      fontSize: "24px",
-                    }}
-                  >
-                    {num <= libro.puntaje ? "★" : "☆"}
-                  </span>
-                ))}
-              </div>
-
-              <p>{libro.resena}</p>
+              <p className="rec-autor">{libro.autor}</p>
+              <p>{libro.descripcion || libro.resena}</p>
             </div>
           ))}
         </div>
-      </div>
+      </main>
     </>
   );
 }
-
-export const resenas = [
-  {
-    titulo: "Cien años de soledad",
-    autor: "Gabriel García Márquez",
-    puntaje: 5,
-    resena: "Una obra maestra del realismo mágico.",
-  },
-  {
-    titulo: "El túnel",
-    autor: "Ernesto Sábato",
-    puntaje: 4,
-    resena: "Intensa y oscura, no la podés soltar.",
-  },
-  {
-    titulo: "Ficciones",
-    autor: "Jorge Luis Borges",
-    puntaje: 5,
-    resena: "Cada cuento es un universo propio.",
-  },
-];
