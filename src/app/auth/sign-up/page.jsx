@@ -5,10 +5,12 @@ import { useState } from "react";
 import Link from "next/link";
 import "../../styles.css";
 import { createClient } from "@/utils/supabase/client.js";
+import { useRouter } from "next/navigation";
 
 const supabase = createClient();
 
 export default function SignUpPage() {
+    const router = useRouter();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirm, setConfirm] = useState("");
@@ -33,14 +35,23 @@ export default function SignUpPage() {
 
         try {
             setLoading(true);
-            const { data, error: signError } = await supabase.auth.signUp({ email, password });
+            const { data, error: signError } = await supabase.auth.signUp({ 
+                email: email, 
+                password: password,  
+            });
+            const user = data?.user;
+                if (user) {
+                    const { error: updateError } = await supabase.from("profiles").insert({ username: name }).eq("id", user.id);
+                }
             if (signError) {
                 setError(signError.message || "Error al crear cuenta.");
             } else {
-                setMessage("Cuenta creada. Revisa tu email para confirmar (si aplica).");
+                setMessage("Cuenta creada.");
                 setEmail("");
                 setPassword("");
                 setConfirm("");
+                setName("");
+                router.push("/auth/sign-in");
             }
         } catch (err) {
             setError(err?.message);

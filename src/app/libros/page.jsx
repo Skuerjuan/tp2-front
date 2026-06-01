@@ -1,12 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import "../styles.css";
-import { fetchResenas, insertResena, updateResena } from "@/utils/resenas.js";
+import { fetchLeidos, fetchResenas, insertLeido, insertResena } from "@/utils/resenas.js";
+import Navbar from "@/components/Navbar";
+import { createClient } from "@/utils/supabase/client.js";
 
-export default function ResenasPage() {
+const supabase = createClient();
+
+export default function LibrosPage() {
   const [resenas, setResenas] = useState([]);
+  const [leidosIds, setLeidosIds] = useState([]);
+  const [userId, setUserId] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -23,6 +28,20 @@ export default function ResenasPage() {
       try {
         setLoading(true);
         setError("");
+
+        const { data: userData, error: userError } = await supabase.auth.getUser();
+
+        if (userError) {
+          throw userError;
+        }
+
+        const user = userData?.user;
+        if (user) {
+          setUserId(user.id);
+          const leidos = await fetchLeidos(user.id);
+          setLeidosIds(leidos.map((item) => item.resena_id).filter(Boolean));
+        }
+
         const data = await fetchResenas();
         if (mounted) {
           setResenas(data);
@@ -70,37 +89,35 @@ export default function ResenasPage() {
     }
   }
 
-  async function cambiarPuntaje(id, valor) {
+  async function marcarComoLeido(resena) {
+    if (!userId) {
+      setError("No se pudo identificar la sesión actual.");
+      return;
+    }
+
     try {
-      const updated = await updateResena(id, { puntaje: Number(valor) });
-      setResenas((prev) => prev.map((item) => (item.id === id ? updated : item)));
+      await insertLeido(userId, resena.id, resena.puntaje || 0);
+      setLeidosIds((prev) => (prev.includes(resena.id) ? prev : [...prev, resena.id]));
     } catch (err) {
-      setError(err?.message || "No se pudo actualizar el puntaje.");
+      setError(err?.message || "No se pudo marcar como leído.");
     }
   }
 
   return (
     <main>
       <header id="header">
-        <h1 id="titulo">Reseñas</h1>
+        <h1 id="titulo">Libros</h1>
         <p id="subtitulo">Agregá un libro nuevo y dejá tu impresión.</p>
       </header>
 
-      <nav id="nav">
-        <Link href="/">Home</Link>
-        <Link href="/leidos">Libros leídos</Link>
-        <Link href="/resenas" className="active">
-          Reseñas
-        </Link>
-        <Link href="/buscar">Buscar</Link>
-      </nav>
+      <Navbar active="libros" />
 
-      {loading && <p className="sin-resultados">Cargando reseñas...</p>}
+      {loading && <p className="sin-resultados">Cargando libros...</p>}
       {!loading && error && <p className="sin-resultados">{error}</p>}
 
       <section className="formulario-box" id="formulario">
         <h2>Agregar un libro</h2>
-        <form onSubmit={agregarLibro} className="form-grid">
+        <form onSubmit={agregarLibro} className="flex flex-col gap-4 max-w-md w-full">
           <input
             type="text"
             id="tituloInput"
@@ -123,16 +140,16 @@ export default function ResenasPage() {
             onChange={(e) => setGenero(e.target.value)}
           >
             <option value="">Seleccionar género…</option>
-            <option value="novela">Novela</option>
-            <option value="cuento">Cuento</option>
-            <option value="ensayo">Ensayo</option>
-            <option value="poesia">Poesía</option>
-            <option value="ciencia ficcion">Ciencia ficción</option>
-            <option value="fantasia">Fantasía</option>
-            <option value="terror">Terror</option>
-            <option value="historica">Histórica</option>
-            <option value="biografía">Biografía</option>
-            <option value="otro">Otro</option>
+            <option value="Novela">Novela</option>
+            <option value="Cuento">Cuento</option>
+            <option value="Ensayo">Ensayo</option>
+            <option value="Poesía">Poesía</option>
+            <option value="Ciencia ficción">Ciencia ficción</option>
+            <option value="Fantasía">Fantasía</option>
+            <option value="Terror">Terror</option>
+            <option value="Histórica">Histórica</option>
+            <option value="Biografía">Biografía</option>
+            <option value="Otro">Otro</option>
           </select>
 
           <div
@@ -199,11 +216,11 @@ export default function ResenasPage() {
         </form>
       </section>
 
-      <h2 className="section-title">✦ Últimas reseñas agregadas</h2>
+      <h2 className="section-title">✦ Últimos libros agregados</h2>
 
       <div id="contenido" className="grid-libros">
         {!loading && !error && resenas.length === 0 ? (
-          <p className="sin-resultados">No hay reseñas aún.</p>
+          <p className="sin-resultados">No hay libros aún.</p>
         ) : (
           resenas.map((libro, i) => (
             <article
@@ -221,24 +238,31 @@ export default function ResenasPage() {
 
               <div className="puntaje">
                 {[1, 2, 3, 4, 5].map((n) => (
-                  <button
+                  <span
                     key={n}
-                    type="button"
-                    onClick={() => cambiarPuntaje(libro.id, n)}
                     style={{
-                      cursor: "pointer",
                       fontSize: "24px",
                       background: "transparent",
                       border: "none",
                     }}
-                    aria-label={`Puntaje ${n}`}
                   >
                     {n <= libro.puntaje ? "★" : "☆"}
-                  </button>
+                  </span>
                 ))}
               </div>
 
               <p>{libro.resena}</p>
+
+              <div className="full-col" style={{ display: "flex", justifyContent: "flex-end", marginTop: 12 }}>
+                <button
+                  type="button"
+                  onClick={() => marcarComoLeido(libro)}
+                  disabled={leidosIds.includes(libro.id)}
+                  className="px-4 py-2 m-4 w-44 rounded-md border border-[color:var(--brown)] text-[color:var(--brown)] disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {leidosIds.includes(libro.id) ? "Ya leído" : "Marcar como leído"}
+                </button>
+              </div>
             </article>
           ))
         )}

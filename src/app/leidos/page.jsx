@@ -1,19 +1,21 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import BookCard from "@/components/BookCard";
 import "../styles.css";
-import { deleteResena, fetchLeidos, updateResena } from "@/utils/resenas.js";
+import { deleteResena, fetchLeidosConResenas, updateLeidoPuntaje, updateResena } from "@/utils/resenas.js";
+import { createClient } from "@/utils/supabase/client.js";
+
+const supabase = createClient();
 
 export default function LibrosLeidosPage() {
+  const router = useRouter();
   const [resenas, setResenas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
-  const [filtroTexto, setFiltroTexto] = useState("");
-  const [filtroGenero, setFiltroGenero] = useState("");
-  const [filtroPuntaje, setFiltroPuntaje] = useState("");
+  const [userId, setUserId] = useState("");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editId, setEditId] = useState(null);
@@ -29,7 +31,23 @@ export default function LibrosLeidosPage() {
       try {
         setLoading(true);
         setError("");
-        const data = await fetchLeidos();
+        const { data: userData, error: userError } = await supabase.auth.getUser();
+
+        if (userError) {
+          throw userError;
+        }
+
+        const user = userData?.user;
+        if (!user) {
+          router.push("/auth/sign-in");
+          return;
+        }
+
+        if (mounted) {
+          setUserId(user.id);
+        }
+
+        const data = await fetchLeidosConResenas(user.id);
         if (mounted) {
           setResenas(data);
         }
@@ -49,20 +67,7 @@ export default function LibrosLeidosPage() {
     return () => {
       mounted = false;
     };
-  }, []);
-
-  const resultados = useMemo(() => {
-    return resenas.filter((r) => {
-      const texto = filtroTexto.trim().toLowerCase();
-      const matchTexto =
-        !texto ||
-        r.titulo.toLowerCase().includes(texto) ||
-        r.autor.toLowerCase().includes(texto);
-      const matchGenero = !filtroGenero || r.genero === filtroGenero;
-      const matchPuntaje = !filtroPuntaje || r.puntaje >= Number(filtroPuntaje);
-      return matchTexto && matchGenero && matchPuntaje;
-    });
-  }, [resenas, filtroTexto, filtroGenero, filtroPuntaje]);
+  }, [router]);
 
   function abrirEditar(id) {
     const t = resenas.find((item) => item.id === id);
@@ -104,9 +109,18 @@ export default function LibrosLeidosPage() {
   }
 
   async function cambiarPuntaje(id, valor) {
+    if (!userId) {
+      setError("No se pudo identificar la sesión actual.");
+      return;
+    }
+
     try {
-      const updated = await updateResena(id, { puntaje: Number(valor) });
-      setResenas((prev) => prev.map((item) => (item.id === id ? updated : item)));
+      const updated = await updateLeidoPuntaje(userId, id, Number(valor));
+      setResenas((prev) =>
+        prev.map((item) =>
+          item.id === id ? { ...item, puntaje_leido: updated.puntaje } : item
+        )
+      );
     } catch (err) {
       setError(err?.message || "No se pudo actualizar el puntaje.");
     }
@@ -130,52 +144,14 @@ export default function LibrosLeidosPage() {
 
       <Navbar active="leidos" />
 
-      <div className="filtros-bar">
-        <input
-          type="text"
-          id="filtroTexto"
-          placeholder="Filtrar por título o autor…"
-          value={filtroTexto}
-          onChange={(e) => setFiltroTexto(e.target.value)}
-        />
-        <select
-          id="filtroGenero"
-          value={filtroGenero}
-          onChange={(e) => setFiltroGenero(e.target.value)}
-        >
-          <option value="">Todos los géneros</option>
-          <option value="novela">Novela</option>
-          <option value="cuento">Cuento</option>
-          <option value="ensayo">Ensayo</option>
-          <option value="poesia">Poesía</option>
-          <option value="ciencia ficcion">Ciencia ficción</option>
-          <option value="fantasia">Fantasía</option>
-          <option value="terror">Terror</option>
-          <option value="historica">Histórica</option>
-          <option value="biografía">Biografía</option>
-          <option value="otro">Otro</option>
-        </select>
-
-        <select
-          id="filtroPuntaje"
-          value={filtroPuntaje}
-          onChange={(e) => setFiltroPuntaje(e.target.value)}
-        >
-          <option value="">Cualquier puntaje</option>
-          <option value="5">★★★★★</option>
-          <option value="4">★★★★☆ o más</option>
-          <option value="3">★★★☆☆ o más</option>
-        </select>
-      </div>
-
       {loading && <p className="sin-resultados">Cargando reseñas...</p>}
       {!loading && error && <p className="sin-resultados">{error}</p>}
 
       <div id="contenido" className="grid-libros">
-        {!loading && !error && resultados.length === 0 ? (
-          <p className="sin-resultados">No se encontraron libros con esos filtros.</p>
+        {!loading && !error && resenas.length === 0 ? (
+          <p className="sin-resultados">No se encontraron libros leídos.</p>
         ) : (
-          resultados.map((libro, i) => {
+          resenas.map((libro, i) => {
             return (
               <BookCard
                 key={libro.id}

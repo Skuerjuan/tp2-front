@@ -9,11 +9,14 @@ export default function Navbar({ active }) {
         <Link href="/leidos" className={active === "leidos" ? "active" : ""}>
             Libros leídos
         </Link>
-        <Link href="/resenas" className={active === "resenas" ? "active" : ""}>
-            Reseñas
+        <Link href="/libros" className={active === "libros" ? "active" : ""}>
+            Libros
         </Link>
         <Link href="/buscar" className={active === "buscar" ? "active" : ""}>
             Buscar
+        </Link>
+        <Link href="/cuenta" className={active === "cuenta" ? "active" : ""}>
+            Mi cuenta
         </Link>
         </nav>
     )
