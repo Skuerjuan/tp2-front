@@ -1,31 +1,48 @@
-import { createClient } from "@supabase/supabase-js"
-import { cookies } from "next/headers";
+
+import Navbar from "@/components/Navbar";
+import "./styles.css";
+import { createClient } from "@/utils/supabase/server.js";
 
 export default async function Home() {
+  const supabase = await createClient();
+  const { data: recomendaciones = [] } = await supabase.from("recomendaciones").select("*");
 
-  const cookieStore = await cookies()
-  const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY)
-  
-  // const { data, error } = await supabase
-  // .from('usuarios')
-  // .insert([
-  //   { nombre: 'Juan', email: 'juan@email.com' }
-  // ])
-  const { data, error } = await supabase
-  .from('users')
-  .select('*')
-  console.log(data)
-  
-  function btn(){
-    console.log(data)
-    console.log(error)
-  }
 
   return (
     <>
-    <div>
-      <button type="button" className="border-solid b-2 p-4" onClick={btn()}>hola</button>
-    </div>
+      <div id="header">
+        <h1 id="titulo">Página de reseñas</h1>
+        <p id="subtitulo">Dejá reseñas a los libros que leíste y lleva un registro.</p>
+      </div>
+
+      <Navbar active="home" />
+
+      <main>
+        <div className="hero">
+          <h2>Bienvenido a tu biblioteca personal</h2>
+          <p>
+            Llevá un registro de lo que leíste, escribí tus impresiones y descubrí nuevas
+            lecturas.
+          </p>
+        </div>
+
+        <h2 className="section-title">✦ Recomendaciones</h2>
+
+        <div className="recomendaciones-grid" id="recomendaciones">
+          {recomendaciones.map((libro, index) => (
+            <div
+              className="rec-card"
+              key={libro.id ?? `${libro.titulo}-${index}`}
+              style={{ animationDelay: `${0.05 * (index + 1)}s` }}
+            >
+              <div className="rec-label">{libro.genero || "Recomendación"}</div>
+              <h3>{libro.titulo}</h3>
+              <p className="rec-autor">{libro.autor}</p>
+              <p>{libro.descripcion || libro.resena}</p>
+            </div>
+          ))}
+        </div>
+      </main>
     </>
   );
 }
