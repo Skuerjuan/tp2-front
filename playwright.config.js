@@ -7,6 +7,13 @@ export default defineConfig({
     baseURL: "http://localhost:3000",
   },
 
+  webServer: {
+    command: "npm run build && npm run start",
+    port: 3000,
+    reuseExistingServer: !process.env.CI,
+    timeout: 120 * 1000,
+  },
+
   projects: [
     {
       name: "chromium",
