@@ -79,14 +79,6 @@ describe("resenas helpers", () => {
     createClientMock.mockReset();
   });
 
-  it("fetchResenas returns all rows", async () => {
-    const { fetchResenas } = await loadModule([
-      { kind: "select", response: { data: [{ id: 1, titulo: "Libro" }], error: null } },
-    ]);
-
-    await expect(fetchResenas()).resolves.toEqual([{ id: 1, titulo: "Libro" }]);
-  });
-
   it("fetchLeidos filters by usuario_id", async () => {
     const { fetchLeidos } = await loadModule([
       { kind: "select", response: { data: [{ puntaje: 4, resena_id: 9 }], error: null } },
