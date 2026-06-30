@@ -61,6 +61,7 @@ export default function SignInPage() {
           type="email"
           placeholder="Email"
           value={email}
+          data-testid="email"
           onChange={(e) => setEmail(e.target.value)}
           required
         />
@@ -69,17 +70,20 @@ export default function SignInPage() {
           type="password"
           placeholder="Contraseña"
           value={password}
+          data-testid="password"
           onChange={(e) => setPassword(e.target.value)}
           required
         />
 
         <div className="full-col flex gap-2 justify-end">
-          <button type="submit" disabled={loading} className="px-4 py-2 bg-brown text-cream rounded">
+          <button type="submit" name="Ingresar" disabled={loading} className="px-4 py-2 bg-brown text-cream rounded">
             {loading ? "Ingresando…" : "Ingresar"}
           </button>
         </div>
 
-        {message && <p className="text-green-600">{message}</p>}
+        <div data-testid="mensaje">
+          {message && <p className="text-green-600">{message}</p>}
+        </div>
         {error && <p className="text-red-600">{error}</p>}
 
         <p className="mt-2">

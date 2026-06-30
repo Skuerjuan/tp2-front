@@ -5,10 +5,12 @@ import "../styles.css";
 import { fetchLeidos, fetchResenas, insertLeido, insertResena } from "@/utils/resenas.js";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/utils/supabase/client.js";
+import { useRouter } from "next/navigation";
 
-const supabase = createClient();
 
 export default function LibrosPage() {
+  const supabase = createClient();
+  const router = useRouter();
   const [resenas, setResenas] = useState([]);
   const [leidosIds, setLeidosIds] = useState([]);
   const [userId, setUserId] = useState("");
@@ -25,6 +27,15 @@ export default function LibrosPage() {
     let mounted = true;
 
     async function loadResenas() {
+
+      const { data } = await supabase.auth.getSession()
+      
+      if(!data.session){
+        router.push("/auth/sign-in")
+        return;
+      }
+
+
       try {
         setLoading(true);
         setError("");

@@ -21,7 +21,17 @@ export default function CuentaPage() {
 	useEffect(() => {
 		let mounted = true;
 
+
+
 		async function loadUser() {
+
+     		const { data: sessionData } = await supabase.auth.getSession()
+      
+      		if(!sessionData.session){
+        		router.push("/auth/sign-in")
+        		return;
+      		}
+
 			const { data, error: userError } = await supabase.auth.getUser();
 
 			if (userError) {

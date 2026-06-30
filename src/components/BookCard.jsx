@@ -4,7 +4,7 @@ export default function BookCard({ book, animationDelay = "0s", onRate, onEdit, 
   const score = book.puntaje_leido ?? book.puntaje ?? 0;
 
   return (
-    <article className="tarjeta" style={{ animationDelay }}>
+    <article className="tarjeta" style={{ animationDelay }} data-testid="book-card" >
       <h3>{book.titulo}</h3>
       <p>
         <strong>Autor:</strong> {book.autor}

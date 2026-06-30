@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import "../styles.css";
 import Navbar from "@/components/Navbar";
 import { fetchResenas, updateResena } from "@/utils/resenas.js";
+import { createClient } from "@/utils/supabase/client.js";
 
 export default function BuscarPage() {
 const [query, setQuery] = useState("");
@@ -17,6 +18,16 @@ useEffect(() => {
     let mounted = true;
 
     async function loadResenas() {
+
+        const supabase = await createClient();
+
+        const { data } = await supabase.auth.getSession()
+        
+        if(!data.session){
+            router.push("/auth/sign-in")
+            return;
+        }
+        
         try {
             setLoading(true);
             setError("");

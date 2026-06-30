@@ -2,11 +2,16 @@
 import Navbar from "@/components/Navbar";
 import "./styles.css";
 import { createClient } from "@/utils/supabase/server.js";
+import { redirect } from "next/navigation";
 
 export default async function Home() {
   const supabase = await createClient();
   const { data: recomendaciones = [] } = await supabase.from("recomendaciones").select("*");
 
+  const { data } = await supabase.auth.getSession();
+  if(data.session == null ){
+    redirect("/auth/sign-in")
+  }
 
   return (
     <>

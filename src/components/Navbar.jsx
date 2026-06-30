@@ -6,10 +6,10 @@ export default function Navbar({ active }) {
         <Link href="/" className={active === "home" ? "active" : ""}>
             Home
         </Link>
-        <Link href="/leidos" className={active === "leidos" ? "active" : ""}>
+        <Link href="/leidos" data-testid="leidos" className={active === "leidos" ? "active" : ""}>
             Libros leídos
         </Link>
-        <Link href="/libros" className={active === "libros" ? "active" : ""}>
+        <Link href="/libros" data-testid="libros" className={active === "libros" ? "active" : ""}>
             Libros
         </Link>
         <Link href="/buscar" className={active === "buscar" ? "active" : ""}>

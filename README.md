@@ -1,4 +1,4 @@
-## TP2 Front
+# TP2 - Aplicación Serverless
 Felipe Maierowicz 5D y Nicole Landetcheverry 5A
 ## Tecnologías
 
@@ -14,3 +14,6 @@ Felipe Maierowicz 5D y Nicole Landetcheverry 5A
 - Libros y reseñas respaldadas en Supabase.
 - Se usaron branches para trabajar, se mergeó usando pull requests en Github.
 - Se pueden cambiar los datos del usuario en el apartado de Mi cuenta.
+
+---  
+# TP3 - CI/CD

@@ -8,10 +8,11 @@ import "../styles.css";
 import { deleteResena, fetchLeidosConResenas, updateLeidoPuntaje, updateResena } from "@/utils/resenas.js";
 import { createClient } from "@/utils/supabase/client.js";
 
-const supabase = createClient();
 
 export default function LibrosLeidosPage() {
   const router = useRouter();
+  const supabase = createClient();
+
   const [resenas, setResenas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -28,6 +29,15 @@ export default function LibrosLeidosPage() {
     let mounted = true;
 
     async function loadResenas() {
+
+      const { data } = await supabase.auth.getSession()
+      
+      if(!data.session){
+        router.push("/auth/sign-in")
+        return;
+      }
+
+
       try {
         setLoading(true);
         setError("");
