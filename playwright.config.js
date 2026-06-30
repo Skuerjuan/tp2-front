@@ -12,6 +12,10 @@ export default defineConfig({
     port: 3000,
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
+    env: {
+      NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    },
   },
 
   projects: [

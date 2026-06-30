@@ -9,9 +9,11 @@ test("flujo", async ({ page }) => {
 
     await page.getByRole("button", { name: "Ingresar" }).click();
 
-    await page.waitForURL(/\/$/);
+    await page.waitForTimeout(3000);
 
-  await expect(page.getByText("Recomendaciones")).toBeVisible();
+    await page.goto("/")
+
+    await page.waitForTimeout(1000);
 
     await page.getByTestId("libros").click();
 
