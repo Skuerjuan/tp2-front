@@ -73,7 +73,7 @@ export default function LibrosPage() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [router, supabase]);
 
   async function agregarLibro(e) {
     e?.preventDefault();

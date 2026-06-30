@@ -77,7 +77,7 @@ export default function LibrosLeidosPage() {
     return () => {
       mounted = false;
     };
-  }, [router]);
+  }, [router, supabase]);
 
   function abrirEditar(id) {
     const t = resenas.find((item) => item.id === id);
