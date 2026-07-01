@@ -30,10 +30,13 @@ describe("BookCard", () => {
       React.createElement(BookCard, {
         book,
         onRate: () => {},
+        onEdit: () => {},
       })
     );
 
-    expect((markup.match(/<button/g) ?? []).length).toBe(5);
+    // 5 rating buttons + 1 edit button
+    expect((markup.match(/<button/g) ?? []).length).toBe(6);
     expect(markup).toContain('aria-label="Puntaje 1"');
+    expect(markup).toContain('aria-label="Editar"');
   });
 });

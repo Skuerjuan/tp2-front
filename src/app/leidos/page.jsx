@@ -80,13 +80,13 @@ export default function LibrosLeidosPage() {
   }, [router, supabase]);
 
   function abrirEditar(id) {
-    const t = resenas.find((item) => item.id === id);
-    if (!t) return;
-    setEditId(id);
-    setEditTitulo(t.titulo);
-    setEditAutor(t.autor);
-    setEditGenero(t.genero || "");
-    setEditResena(t.resena || "");
+    console.log("abrirEditar called with:", id);
+    const book = id && typeof id === "object" ? id : resenas.find((item) => item.id === id);
+    setEditId(book.id ?? null);
+    setEditTitulo(book.titulo ?? "");
+    setEditAutor(book.autor ?? "");
+    setEditGenero(book.genero ?? "");
+    setEditResena(book.resena ?? "");
     setIsModalOpen(true);
   }
 
@@ -177,7 +177,7 @@ export default function LibrosLeidosPage() {
       </div>
 
       {isModalOpen && (
-        <div className="modal-overlay" role="dialog" aria-modal="true">
+        <div className={"modal-overlay abierto"} role="dialog" aria-modal="true" data-testid="edit-modal">
           <div className="modal">
             <button
               className="modal-cerrar"
